@@ -96,9 +96,11 @@ var AllLevels = []Level{
 // These are the different logging levels. You can set the logging level to log
 // on your instance of logger, obtained with `logrus.New()`.
 const (
+	// NoneLevel level. Disables event logging
+	NoneLevel Level = iota
 	// PanicLevel level, highest level of severity. Logs and then calls panic with the
 	// message passed to Debug, Info, ...
-	PanicLevel Level = iota
+	PanicLevel
 	// FatalLevel level. Logs and then calls `logger.Exit(1)`. It will exit even if the
 	// logging level is set to Panic.
 	FatalLevel
@@ -114,8 +116,6 @@ const (
 	DebugLevel
 	// TraceLevel level. Designates finer-grained informational events than the Debug.
 	TraceLevel
-	// NoneLevel level. Disables event logging
-	NoneLevel
 )
 
 // Won't compile if StdLogger can't be realized by a log.Logger
