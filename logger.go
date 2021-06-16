@@ -34,6 +34,8 @@ type Logger struct {
 	// Flag for whether to log caller info (off by default)
 	ReportCaller bool
 
+	// Flag for whether to log create log entries (on by default)
+	Enabled bool
 	// The logging level the logger should log at. This is typically (and defaults
 	// to) `logrus.Info`, which allows Info(), Warn(), Error() and Fatal() to be
 	// logged.
@@ -89,10 +91,18 @@ func New() *Logger {
 		Out:          os.Stderr,
 		Formatter:    new(TextFormatter),
 		Hooks:        make(LevelHooks),
+		Enabled:      enableLogger(InfoLevel),
 		Level:        InfoLevel,
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
+}
+
+func enableLogger(level Level) bool {
+	if level == NoneLevel {
+		return false
+	}
+	return true
 }
 
 func (logger *Logger) newEntry() *Entry {
@@ -374,7 +384,7 @@ func (logger *Logger) AddHook(hook Hook) {
 
 // IsLevelEnabled checks if the log level of the logger is greater than the level param
 func (logger *Logger) IsLevelEnabled(level Level) bool {
-	return logger.level() >= level
+	return ((logger.level() >= level) && logger.Enabled)
 }
 
 // SetFormatter sets the logger formatter.
