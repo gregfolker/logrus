@@ -6,7 +6,7 @@ import (
 	"log/syslog"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	"github.com/gregfolker/logrus"
 	slhooks "github.com/sirupsen/logrus/hooks/syslog"
 )
 
