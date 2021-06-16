@@ -87,22 +87,26 @@ func (mw *MutexWrap) Disable() {
 //
 // It's recommended to make this a global instance called `log`.
 func New() *Logger {
-	return &Logger{
+	l := &Logger{
 		Out:          os.Stderr,
 		Formatter:    new(TextFormatter),
 		Hooks:        make(LevelHooks),
-		Enabled:      enableLogger(InfoLevel),
 		Level:        InfoLevel,
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
+
+	l.enableLogger()
+
+	return l
 }
 
-func enableLogger(level Level) bool {
-	if level == NoneLevel {
-		return false
+func (l *Logger) enableLogger() {
+	if l.level() == NoneLevel {
+		l.Enabled = false
+	} else {
+		l.Enabled = true
 	}
-	return true
 }
 
 func (logger *Logger) newEntry() *Entry {
@@ -159,7 +163,7 @@ func (logger *Logger) WithTime(t time.Time) *Entry {
 }
 
 func (logger *Logger) Logf(level Level, format string, args ...interface{}) {
-	if logger.IsLevelEnabled(level) {
+	if logger.IsLevelEnabled(level) && logger.Enabled {
 		entry := logger.newEntry()
 		entry.Logf(level, format, args...)
 		logger.releaseEntry(entry)
@@ -206,7 +210,7 @@ func (logger *Logger) Panicf(format string, args ...interface{}) {
 }
 
 func (logger *Logger) Log(level Level, args ...interface{}) {
-	if logger.IsLevelEnabled(level) {
+	if logger.IsLevelEnabled(level) && logger.Enabled {
 		entry := logger.newEntry()
 		entry.Log(level, args...)
 		logger.releaseEntry(entry)
@@ -214,7 +218,7 @@ func (logger *Logger) Log(level Level, args ...interface{}) {
 }
 
 func (logger *Logger) LogFn(level Level, fn LogFunction) {
-	if logger.IsLevelEnabled(level) {
+	if logger.IsLevelEnabled(level) && logger.Enabled {
 		entry := logger.newEntry()
 		entry.Log(level, fn()...)
 		logger.releaseEntry(entry)
@@ -384,7 +388,7 @@ func (logger *Logger) AddHook(hook Hook) {
 
 // IsLevelEnabled checks if the log level of the logger is greater than the level param
 func (logger *Logger) IsLevelEnabled(level Level) bool {
-	return ((logger.level() >= level) && logger.Enabled)
+	return logger.level() >= level
 }
 
 // SetFormatter sets the logger formatter.
